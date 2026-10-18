@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搭子计划 · 产品原型（三步体验）</title>
+<style>
+  :root{
+    --paper:#F7F3EA; --card:#FFFDF8; --ink:#1B2620; --coral:#FF5A36;
+    --coral-soft:#FFEDE6; --green:#2E6B4E; --green-soft:#E8F0EA;
+    --line:#E4DCCB; --muted:#6B7268;
+    --num:"Arial Black","Bahnschrift","Arial",sans-serif;
+    --sans:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:96px}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  button,input,select{font-family:var(--sans);color:inherit}
+  .wrap{width:min(1120px,calc(100% - 40px));margin:0 auto}
+
+  /* ---------- header ---------- */
+  header{position:sticky;top:0;z-index:30;background:rgba(247,243,234,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px;white-space:nowrap}
+  .brand i{width:10px;height:10px;background:var(--coral);border-radius:2px;transform:rotate(45deg);display:block}
+  .brand .logo{width:34px;height:34px;flex:none;background:var(--green);color:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:10px;letter-spacing:.04em;font-weight:700}
+  .brand em{font-style:normal;font-size:11px;font-weight:400;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 8px;margin-left:2px}
+  .brand .nm{font-size:15px;font-weight:800;line-height:1.1}
+  .brand .nm span{font-family:var(--num);font-size:9px;letter-spacing:.12em;color:var(--coral);margin-left:6px;font-weight:400;vertical-align:1px}
+  .brand .sub{font-size:10.5px;font-weight:400;color:var(--muted);line-height:1.3}
+  .steps{display:flex;gap:6px}
+  .steps a{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);padding:6px 11px;border-radius:99px;transition:.2s;text-decoration:none}
+  .steps a b{font-family:var(--num);font-size:10px;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center}
+  .steps a:hover{background:#fff}
+  .steps a.on{background:var(--ink);color:var(--paper)}
+  .steps a.done b{background:var(--green);border-color:var(--green);color:#fff}
+  .ghost{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;font-size:12.5px;cursor:pointer;transition:.18s}
+  .ghost:hover{border-color:var(--ink)}
+
+  /* ---------- intro ---------- */
+  .intro{padding:40px 0 26px}
+  .intro .kick{font-family:var(--num);font-size:11px;letter-spacing:.2em;color:var(--coral)}
+  .intro h1{font-size:clamp(26px,3.4vw,38px);line-height:1.25;letter-spacing:-.01em;margin-top:10px;font-weight:800}
+  .intro p{font-size:14.5px;color:var(--muted);margin-top:10px;max-width:44em}
+  .intro .hint{display:inline-flex;gap:8px;align-items:center;margin-top:16px;font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 13px;color:var(--muted)}
+  .intro .hint b{color:var(--green)}
+
+  /* ---------- section ---------- */
+  section{padding:34px 0}
+  .head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .head h2{font-size:21px;font-weight:800}
+  .head span{font-size:12.5px;color:var(--muted)}
+  .head .no{font-family:var(--num);font-size:12px;color:#fff;background:var(--coral);border-radius:4px;padding:3px 8px}
+  .panel{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:24px}
+  .split{display:grid;grid-template-columns:1.08fr .92fr;gap:18px;align-items:start}
+
+  /* ---------- form ---------- */
+  .row{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;padding:11px 0;border-bottom:1px dashed var(--line)}
+  .row:last-of-type{border-bottom:none}
+  .row > label{font-size:13px;color:var(--muted)}
+  .row .req::after{content:"*";color:var(--coral);margin-left:2px}
+  input[type=text],select{width:100%;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;font-size:14px;outline:none;transition:.18s}
+  input[type=text]:focus,select:focus{border-color:var(--ink)}
+  input[type=text].err{border-color:var(--coral);background:var(--coral-soft)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font-size:12.5px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--ink)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .chip.on.coral{background:var(--coral);border-color:var(--coral)}
+  .idstate{font-size:12px;margin-top:6px;color:var(--muted);display:flex;gap:6px;align-items:center}
+  .idstate.ok{color:var(--green)}
+  .dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+  .agree{display:flex;gap:10px;align-items:flex-start;margin-top:16px;padding:13px 14px;background:#fff;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;color:var(--muted);line-height:1.55}
+  .agree input{margin-top:3px;accent-color:var(--coral);width:15px;height:15px;flex:none}
+  .actions{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
+  .btn{background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:11px 20px;font-size:14px;font-weight:700;cursor:pointer;transition:.18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.coral{background:var(--coral)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .msg{font-size:12.5px;color:var(--coral)}
+
+  /* ---------- profile card ---------- */
+  .pcard{background:var(--ink);color:var(--paper);border-radius:14px;padding:20px;position:sticky;top:88px}
+  .pcard .t{font-size:11px;letter-spacing:.14em;color:rgba(247,243,234,.5);font-family:var(--num)}
+  .pcard .who{display:flex;align-items:center;gap:12px;margin-top:14px}
+  .pcard .ava{width:44px;height:44px;border-radius:12px;background:rgba(255,90,54,.18);display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:16px;color:#FF8A6A}
+  .pcard .who b{font-size:16px;display:block}
+  .pcard .who span{font-size:12px;color:rgba(247,243,234,.55)}
+  .pcard dl{margin-top:16px;border-top:1px solid rgba(247,243,234,.16)}
+  .pcard .kv{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:7px 0;border-bottom:1px solid rgba(247,243,234,.1)}
+  .pcard .kv span{color:rgba(247,243,234,.5)}
+  .pcard .kv b{font-weight:700;text-align:right}
+  .pcard .empty{font-size:12.5px;color:rgba(247,243,234,.45);margin-top:16px;line-height:1.7}
+
+  /* ---------- planner ---------- */
+  .field{margin-bottom:16px}
+  .field .lab{font-size:11.5px;letter-spacing:.1em;color:var(--muted);font-family:var(--num);margin-bottom:8px}
+  table.slots{border-collapse:separate;border-spacing:5px;width:100%;min-width:400px}
+  table.slots th{font-size:10.5px;color:var(--muted);font-family:var(--num);font-weight:400;padding-bottom:2px}
+  table.slots th.rowh{text-align:right;padding-right:6px;white-space:nowrap}
+  .cell{width:100%;height:36px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--muted);font-size:11.5px;cursor:pointer;transition:.15s}
+  .cell:hover{border-color:var(--ink)}
+  .cell.free{background:var(--green-soft);border-color:#BFD5C7;color:var(--green);font-weight:700}
+  .cell.busy{background:var(--coral-soft);border-color:#FFC7B6;color:#C3401F}
+  .legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+  .legend i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:middle}
+  .out{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;min-height:100%}
+  .out .otop{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .out .otop b{font-size:14px}
+  .out .otop span{font-size:11.5px;color:var(--muted)}
+  .plist{display:flex;flex-direction:column;gap:8px;margin-top:12px;flex:1}
+  .pitem{display:flex;gap:12px;align-items:center;flex:1;min-height:58px;background:var(--paper);border-radius:10px;padding:10px 12px;animation:up .3s ease both}
+  @keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .pitem .when{width:76px;flex:none}
+  .pitem .when b{font-family:var(--num);font-size:12px;display:block}
+  .pitem .when span{font-size:10.5px;color:var(--muted)}
+  .pitem .what b{font-size:13px;display:block;line-height:1.4}
+  .pitem .what span{font-size:11px;color:var(--muted);display:block;margin-top:2px}
+  .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+  .mini b{display:block;font-family:var(--num);font-size:19px;line-height:1.1}
+  .mini span{font-size:10.5px;color:var(--muted)}
+  .mini div:nth-child(2) b{color:var(--coral)}
+  .note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.65}
+  .empty-state{font-size:12.5px;color:var(--muted);padding:18px 0;text-align:center}
+
+  /* ---------- credit ---------- */
+  .scorebox{background:var(--ink);color:var(--paper);border-radius:14px;padding:24px}
+  .scorebox .t{font-size:11px;letter-spacing:.14em;color:rgba(247,243,234,.5);font-family:var(--num)}
+  .scoreline{display:flex;align-items:flex-end;gap:12px;margin-top:6px}
+  .score{font-family:var(--num);font-size:76px;line-height:.95;transition:.3s}
+  .score.jolt{animation:jolt .3s}
+  @keyframes jolt{0%{transform:translateX(0)}35%{transform:translateX(-4px)}70%{transform:translateX(3px)}100%{transform:translateX(0)}}
+  .badge{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:99px;margin-bottom:12px;transition:.25s}
+  .bar{height:12px;border-radius:99px;background:rgba(247,243,234,.14);margin-top:18px;position:relative}
+  .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#3E8A65,#7CC49B);transition:width .4s cubic-bezier(.2,.8,.2,1),background .25s}
+  .mark{position:absolute;left:60%;top:-4px;bottom:-4px;width:2px;background:var(--coral)}
+  .barlab{display:flex;justify-content:space-between;font-size:10.5px;color:rgba(247,243,234,.45);margin-top:7px;font-family:var(--num)}
+  .sims{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:18px}
+  .sim{display:flex;justify-content:space-between;gap:8px;background:rgba(247,243,234,.07);border:1.5px solid rgba(247,243,234,.15);color:var(--paper);border-radius:9px;padding:9px 12px;font-size:12.5px;cursor:pointer;text-align:left;transition:.15s}
+  .sim:hover{background:rgba(247,243,234,.14);border-color:rgba(247,243,234,.35)}
+  .sim small{font-family:var(--num);opacity:.7;font-size:11px}
+  .logbox{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column}
+  .logbox .lt{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .logbox .lt b{font-size:14px}
+  .logbox .lt span{font-size:11.5px;color:var(--muted)}
+  .log{list-style:none;flex:1;margin-top:6px}
+  .log li{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:8px 0;border-bottom:1px dashed var(--line);animation:up .25s ease both}
+  .log li span{color:var(--muted);font-size:11px;display:block;margin-top:2px}
+  .log li b{font-family:var(--num);font-size:12px}
+  .rules{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+  .rules div{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:4px 0}
+  .rules b{color:var(--ink);font-family:var(--num);font-size:11.5px}
+
+  footer{padding:30px 0 50px;font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,14px);background:var(--ink);color:var(--paper);font-size:13px;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.25s;z-index:50}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  @media(max-width:900px){
+    .split{grid-template-columns:1fr}
+    .pcard{position:static}
+    .steps a span{display:none}
+    .sims{grid-template-columns:1fr}
+    .row{grid-template-columns:80px 1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <div class="brand">
+      <span class="logo">SDUT</span>
+      <div>
+        <div class="nm">理工搭子<span>SDUT GYM BUDDY</span></div>
+        <div class="sub">山东理工大学 · 东校区 / 西校区</div>
+      </div>
+      <em>产品原型</em>
+    </div>
+    <nav class="steps">
+      <a href="#step1" data-step="1"><b>1</b><span>填资料</span></a>
+      <a href="#step2" data-step="2"><b>2</b><span>排日程</span></a>
+      <a href="#step3" data-step="3"><b>3</b><span>信用分</span></a>
+    </nav>
+    <button class="ghost" id="resetAll">重填</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap intro">
+    <div class="kick">理工搭子 · SDUT GYM BUDDY · 可交互原型</div>
+    <h1>三步走完一次真实使用</h1>
+    <p><b>理工搭子</b>：山东理工大学校内健身搭子匹配服务，覆盖东校区与西校区。填一次资料，按你的课表排出本周训练并配上同校区搭子；练完互评，信用分实时变化。下面每个规则都按项目方案里的真实设定来。</p>
+    <div class="hint"><span class="dot" style="color:var(--green)"></span>三步数据是打通的：<b>资料会决定日程</b>，<b>日程会影响信用分记录</b></div>
+  </div>
+
+  <!-- ============ ① 填资料 ============ -->
+  <section id="step1">
+    <div class="wrap">
+      <div class="head">
+        <span class="no">01</span>
+        <h2>填写个人信息</h2>
+        <span>只面向山东理工大学在读学生 · 学号用于一人一号核验</span>
+      </div>
+      <div class="split">
+        <div class="panel">
+          <div class="row">
+            <label class="req">学号</label>
+            <div>
+              <input type="text" id="sid" maxlength="12" placeholder="12 位学号（演示：任意 8 位以上数字）" inputmode="numeric">
+              <div class="idstate" id="sidState"><span class="dot"></span>未校验 · 一人一号，一个学号只能注册一次</div>
+            </div>
+          </div>
+          <div class="row">
+            <label class="req">学院</label>
+            <select id="college">
+              <option value="">请选择</option>
+              <option>经济学院</option><option>管理学院</option>
+              <option>计算机科学与技术学院</option><option>机械工程学院</option>
+              <option>交通与车辆工程学院</option><option>电气与电子工程学院</option>
+              <option>材料科学与工程学院</option><option>化学化工学院</option>
+              <option>农业工程与食品科学学院</option><option>建筑工程学院</option>
+              <option>资源与环境工程学院</option><option>生命与医药学院</option>
+              <option>文学与新闻传播学院</option><option>外国语学院</option>
+              <option>法学院</option><option>马克思主义学院</option>
+              <option>理学院</option><option>体育学院</option><option>美术学院</option>
+              <option>国际教育学院</option><option>其他学院</option>
+            </select>
+          </div>
+          <div class="row">
+            <label class="req">校区</label>
+            <div class="chips" id="campus">
+              <button class="chip on" data-v="东校区">东校区</button>
+              <button class="chip" data-v="西校区">西校区</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>年级</label>
+            <div class="chips" id="grade">
+              <button class="chip on" data-v="大一">大一</button>
+              <button class="chip" data-v="大二">大二</button>
+              <button class="chip" data-v="大三">大三</button>
+              <button class="chip" data-v="大四">大四</button>
+              <button class="chip" data-v="研究生">研究生</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>性别</label>
+            <div class="chips" id="gender">
+              <button class="chip" data-v="男">男</button>
+              <button class="chip" data-v="女">女</button>
+              <button class="chip on" data-v="不限">不限（随便谁）</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>健身基础</label>
+            <div class="chips" id="level">
+              <button class="chip on" data-v="新手">新手（没进过器械区）</button>
+              <button class="chip" data-v="有基础">有基础（练过 3 个月以上）</button>
+              <button class="chip" data-v="练过但断了">练过但断了（想捡回来）</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>本周目标</label>
+            <div class="chips" id="goal">
+              <button class="chip on" data-v="newbie">熟悉器械</button>
+              <button class="chip" data-v="fat">减脂</button>
+              <button class="chip" data-v="muscle">增肌</button>
+              <button class="chip" data-v="posture">体态改善</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>每周次数</label>
+            <div class="chips" id="freq">
+              <button class="chip" data-v="2">2 次</button>
+              <button class="chip on" data-v="3">3 次</button>
+              <button class="chip" data-v="4">4 次</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>偏好时段</label>
+            <div class="chips" id="pref">
+              <button class="chip on" data-v="晚上">晚上</button>
+              <button class="chip" data-v="下午">下午</button>
+              <button class="chip" data-v="上午">上午</button>
+              <button class="chip" data-v="早间">早间（06:30 前）</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>常去场地</label>
+            <div class="chips" id="place">
+              <button class="chip on" data-v="东校区体育馆">东校区体育馆</button>
+              <button class="chip" data-v="西校区体育馆">西校区体育馆</button>
+              <button class="chip" data-v="校内操场">校内操场</button>
+              <button class="chip" data-v="校外健身房">校外健身房</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>身高 / 体重</label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="text" id="ht" maxlength="3" placeholder="身高 cm" inputmode="numeric" style="max-width:110px">
+              <input type="text" id="wt" maxlength="3" placeholder="体重 kg" inputmode="numeric" style="max-width:110px">
+              <span id="bmiTxt" style="font-size:12px;color:var(--muted)">选填，只用于估算训练量，不外泄</span>
+            </div>
+          </div>
+          <div class="row">
+            <label>性格标签</label>
+            <div class="chips" id="tags">
+              <button class="chip" data-v="社恐">社恐</button>
+              <button class="chip on" data-v="需要有人催">需要有人催</button>
+              <button class="chip" data-v="喜欢安静练">喜欢安静练</button>
+              <button class="chip" data-v="喜欢边练边聊">喜欢边练边聊</button>
+              <button class="chip" data-v="愿意带新人">愿意带新人</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>禁忌</label>
+            <div class="chips" id="taboo">
+              <button class="chip" data-v="不喜欢高强度">不喜欢高强度</button>
+              <button class="chip on" data-v="不喜欢迟到">不喜欢迟到</button>
+              <button class="chip" data-v="不想被推销">不想被推销</button>
+              <button class="chip" data-v="不想被拍照">不想被拍照</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>是否做带练者</label>
+            <div class="chips" id="coach">
+              <button class="chip" data-v="愿意">愿意（带新手 1 次，可抵 1 个月月费）</button>
+              <button class="chip on" data-v="暂时不了">暂时不了</button>
+            </div>
+          </div>
+
+          <label class="agree">
+            <input type="checkbox" id="agree">
+            <span>我承诺：本人为山东理工大学在读学生，信息真实；组队健身文明相处、不骚扰他人；若恶意爽约或言语冒犯，项目组有权公示校内账号并上报学院。</span>
+          </label>
+
+          <div class="actions">
+            <button class="btn coral" id="saveBtn">保存资料，去排日程 →</button>
+            <span class="msg" id="formMsg"></span>
+          </div>
+        </div>
+
+        </div>
+
+        <aside class="pcard" id="pcard">
+          <div class="t">MY PROFILE</div>
+          <div class="who">
+            <div class="ava" id="ava">新</div>
+            <div><b id="pName">还没填资料</b><span id="pSub">填完右边几项，这里会生成你的资料卡</span></div>
+          </div>
+          <div class="empty" id="pEmpty">资料只用于匹配：不对外展示学号，学信网/学生证截图仅人工核验，其他用户看不到。</div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ② 排日程 ============ -->
+  <section id="step2">
+    <div class="wrap">
+      <div class="head">
+        <span class="no">02</span>
+        <h2>课表 → 一周训练日程</h2>
+        <span>点亮「有空」的格子，按你的目标和次数排出本周训练</span>
+      </div>
+      <div class="split">
+        <div class="panel">
+          <div class="field">
+            <div class="lab">点格子切换：有空 / 有课（默认按一个大二课表填好）</div>
+            <div style="overflow-x:auto"><table class="slots" id="slotTable"></table></div>
+            <div class="legend">
+              <span><i style="background:var(--green-soft);border:1px solid #BFD5C7"></i>有空</span>
+              <span><i style="background:var(--coral-soft);border:1px solid #FFC7B6"></i>有课 / 没空</span>
+              <span id="slotCount"></span>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn coral" id="genBtn">生成本周日程 →</button>
+            <button class="ghost" id="clearAll">全部清空 ↓</button>
+          </div>
+        </div>
+
+        <div class="out">
+          <div class="otop"><b>本周训练日程</b><span id="outMeta">目标：熟悉器械 · 3 次</span></div>
+          <div class="plist" id="plist"><div class="empty-state">还没有日程，点左边按钮生成</div></div>
+          <div class="mini">
+            <div><b id="mS">0</b><span>次 / 本周</span></div>
+            <div><b id="mM">0</b><span>分钟训练</span></div>
+            <div><b id="mB">0</b><span>位搭子</span></div>
+          </div>
+          <div class="note" id="outNote">匹配条件：本校实名 · 信用分 ≥ 95 · 同时段 · 水平接近。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ③ 信用分 ============ -->
+  <section id="step3">
+    <div class="wrap">
+      <div class="head">
+        <span class="no">03</span>
+        <h2>信用分计算</h2>
+        <span>初始 100 分，爽约 −20，低于 60 分永久取消匹配资格</span>
+      </div>
+      <div class="split">
+        <div class="scorebox">
+          <div class="t">CREDIT SCORE</div>
+          <div class="scoreline">
+            <span class="score" id="score">100</span>
+            <span class="badge" id="badge" style="background:rgba(124,196,155,.18);color:#9BD8B4">状态正常</span>
+          </div>
+          <div class="bar"><div class="fill" id="fill"></div><div class="mark"></div></div>
+          <div class="barlab"><span>0</span><span style="color:var(--coral)">60 · 退场线</span><span>100</span></div>
+          <div class="sims">
+            <button class="sim" data-d="2" data-r="准时赴约，还帮搭子看了动作"><span>准时赴约</span><small>+2</small></button>
+            <button class="sim" data-d="-5" data-r="迟到 15 分钟"><span>迟到</span><small>−5</small></button>
+            <button class="sim" data-d="-10" data-r="言语越界，被举报"><span>言语冒犯</span><small>−10</small></button>
+            <button class="sim" data-d="-20" data-r="没打招呼，直接没去"><span>无故爽约</span><small>−20</small></button>
+          </div>
+          <div class="note" style="color:rgba(247,243,234,.5)">只记可观察的行为，不做性格打分——避免主观差评变成人身攻击。</div>
+        </div>
+
+        <div class="logbox">
+          <div class="lt"><b>行为记录</b><span id="logCount">0 条</span></div>
+          <ul class="log" id="log"><li style="border:none;color:var(--muted)">还没有记录。每一次履约都会被记住。</li></ul>
+          <div class="rules">
+            <div style="border:none;padding:0 0 6px;font-family:var(--num);letter-spacing:.1em;font-size:10.5px">计 分 规 则</div>
+            <div><span>无故爽约</span><b>−20 / 次</b></div>
+            <div><span>多次迟到（累计 3 次起）</span><b>−5 / 次</b></div>
+            <div><span>言语冒犯、越界</span><b>−10 ~ −20</b></div>
+            <div><span>连续 3 次准时且好评</span><b>+2</b></div>
+            <div><span>低于 60 分</span><b>永久取消匹配</b></div>
+          </div>
+          <div class="actions"><button class="ghost" id="resetScore">重置为 100 分</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <footer>
+      <div>搭子计划 · 校园健身搭子匹配服务 · 大学生创业基础小组作业（第 07 组）</div>
+      <div>数据为课程演示 · 规则按方案设定</div>
+    </footer>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 通用 ============ */
+const $ = s => document.querySelector(s);
+const toastEl = $('#toast');
+let toastTimer;
+function toast(msg){
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>toastEl.classList.remove('show'), 1800);
+}
+
+/* ============ 状态 ============ */
+const state = {
+  sid:'', college:'', campus:'东校区', grade:'大一', gender:'不限', level:'新手',
+  goal:'newbie', freq:3, pref:['晚上'], place:'东校区体育馆',
+  ht:'', wt:'', tags:['需要有人催'], taboo:['不喜欢迟到'], coach:'暂时不了',
+  agree:false, saved:false
+};
+const GOAL_NAME = {newbie:'熟悉器械', fat:'减脂', muscle:'增肌', posture:'体态改善'};
+const DAYS = ['周一','周二','周三','周四','周五','周六','周日'];
+const SLOTS = ['早间','上午','下午','晚上'];
+const SLOT_TIME = ['06:30—07:30','09:30—10:30','15:00—16:00','19:00—20:00'];
+/* true = 有课 */
+let busy = [
+  [0,1,0,0],[0,1,1,0],[0,0,1,0],[0,1,0,0],[0,0,0,1],[0,0,0,0],[0,0,0,0]
+];
+
+/* ============ ① 表单 ============ */
+function chipGroup(id, key, multi){
+  const box = document.getElementById(id);
+  box.addEventListener('click', e=>{
+    const b = e.target.closest('.chip'); if(!b) return;
+    const v = b.dataset.v;
+    if(multi){
+      const i = state[key].indexOf(v);
+      if(i>-1){ state[key].splice(i,1); b.classList.remove('on'); }
+      else { state[key].push(v); b.classList.add('on'); }
+    }else{
+      [...box.querySelectorAll('.chip')].forEach(x=>x.classList.remove('on'));
+      b.classList.add('on'); state[key] = v;
+    }
+    syncPlannerWithProfile();
+    renderProfile();
+  });
+}
+chipGroup('campus','campus',false);
+chipGroup('grade','grade',false);
+chipGroup('gender','gender',false);
+chipGroup('level','level',false);
+chipGroup('goal','goal',false);
+chipGroup('freq','freq',false);
+chipGroup('pref','pref',true);
+chipGroup('place','place',false);
+chipGroup('tags','tags',true);
+chipGroup('taboo','taboo',true);
+chipGroup('coach','coach',false);
+
+$('#sid').addEventListener('input', e=>{
+  state.sid = e.target.value.replace(/\D/g,'');
+  e.target.value = state.sid;
+  const ok = state.sid.length >= 8;
+  const el = $('#sidState');
+  el.classList.toggle('ok', ok);
+  el.innerHTML = ok
+    ? '<span class="dot"></span>模拟核验通过 · 一人一号'
+    : '<span class="dot"></span>' + (state.sid.length ? '学号至少 8 位' : '未校验');
+  e.target.classList.toggle('err', state.sid.length > 0 && !ok);
+  renderProfile();
+});
+$('#college').addEventListener('change', e=>{ state.college = e.target.value; renderProfile(); });
+['#ht','#wt'].forEach(sel=>{
+  $(sel).addEventListener('input', e=>{
+    e.target.value = e.target.value.replace(/\D/g,'');
+    state.ht = $('#ht').value; state.wt = $('#wt').value;
+    const h = +state.ht, w = +state.wt;
+    if(h > 120 && w > 25){
+      const bmi = (w / Math.pow(h/100, 2)).toFixed(1);
+      const tag = bmi < 18.5 ? '偏瘦' : bmi < 24 ? '正常范围' : bmi < 28 ? '偏重' : '偏胖';
+      $('#bmiTxt').textContent = `BMI ${bmi} · ${tag}（仅供参考，不做医疗建议）`;
+    } else {
+      $('#bmiTxt').textContent = '选填，只用于估算训练量，不外泄';
+    }
+    renderProfile();
+  });
+});
+$('#agree').addEventListener('change', e=>{ state.agree = e.target.checked; });
+
+function renderProfile(){
+  const filled = state.sid.length >= 8 && state.college;
+  $('#pEmpty').style.display = filled ? 'none' : 'block';
+  $('#pcard').querySelectorAll('[data-kvs]').forEach(n=>n.remove());
+  $('#pName').textContent = filled ? `${state.college} · ${state.grade}` : '还没填资料';
+  $('#pSub').textContent = filled ? `学号 ${state.sid.slice(0,4)}****${state.sid.slice(-2)} · ${state.campus}` : '填完左边几项，这里会生成你的资料卡';
+  $('#ava').textContent = filled ? state.college.slice(0,1) : '新';
+  if(!filled) return;
+  const bmiLine = (+state.ht > 120 && +state.wt > 25) ? `BMI ${(+state.wt / Math.pow(+state.ht/100,2)).toFixed(1)}` : '未填';
+  const rows = [
+    ['校区 / 性别', `${state.campus} · ${state.gender}`],
+    ['健身基础', state.level],
+    ['本周目标', `${GOAL_NAME[state.goal]} · 每周 ${state.freq} 次`],
+    ['偏好时段', state.pref.length ? state.pref.join(' / ') : '不限'],
+    ['常去场地', state.place],
+    ['身高体重', bmiLine],
+    ['性格标签', state.tags.length ? state.tags.join('、') : '未选'],
+    ['禁忌', state.taboo.length ? state.taboo.join('、') : '未选'],
+    ['带练者', state.coach === '愿意' ? '愿意带新人' : '暂时不了']
+  ];
+  const dl = document.createElement('div');
+  dl.setAttribute('data-kvs','1');
+  dl.innerHTML = rows.map(r=>`<div class="kv"><span>${r[0]}</span><b>${String(r[1]).replace(/</g,'&lt;')}</b></div>`).join('');
+  $('#pcard').appendChild(dl);
+}
+
+$('#saveBtn').addEventListener('click', ()=>{
+  if(state.sid.length < 8){ $('#formMsg').textContent = '先填一个 8 位以上学号'; $('#sid').classList.add('err'); $('#sid').focus(); return; }
+  if(!state.college){ $('#formMsg').textContent = '请选择学院'; $('#college').focus(); return; }
+  if(!state.agree){ $('#formMsg').textContent = '需要先勾选承诺书'; return; }
+  $('#formMsg').textContent = '';
+  state.saved = true;
+  document.querySelector('.steps a[data-step="1"]').classList.add('done');
+  syncPlannerWithProfile();
+  generate();
+  toast('资料已保存，已按你的课表排好本周日程');
+  setTimeout(()=>$('#step2').scrollIntoView({behavior:'smooth', block:'start'}), 220);
+});
+
+/* 资料联动排程 */
+function syncPlannerWithProfile(){
+  FREQ = +state.freq;
+  GOAL = state.goal;
+  document.querySelectorAll('#freq .chip').forEach(c=>c.classList.toggle('on', +c.dataset.v === state.freq));
+  document.querySelectorAll('#goal .chip').forEach(c=>c.classList.toggle('on', c.dataset.v === state.goal));
+}
+function renderProfileEmpty(){ renderProfile(); }
+
+/* ============ ② 排程 ============ */
+let GOAL = 'newbie', FREQ = 3;
+
+const TEMPLATES = {
+  newbie:[
+    {t:'器械区导览 + 固定器械 4 台', d:'先认器械、调重量，学会坐上去不尴尬'},
+    {t:'深蹲 / 硬拉动作学习（空杆）', d:'只学动作模式，不加重量，有人看着做'},
+    {t:'上肢推拉各 2 个动作', d:'胸推、划船、推举、下拉，各 3 组'},
+    {t:'拉伸 15 分钟 + 快走 20 分钟', d:'练完别急着走，把紧绷的地方放开'}
+  ],
+  fat:[
+    {t:'下肢力量 + 快走 30 分钟', d:'深蹲、腿举、臀桥，心率保持在能说话的区间'},
+    {t:'间歇跑 20 分钟', d:'1 分钟快 / 2 分钟慢，重复 6 组'},
+    {t:'上肢循环 + 核心', d:'4 个动作循环 3 轮，中间休息 60 秒'},
+    {t:'有氧 35 分钟 + 核心', d:'椭圆机或爬楼机，结束后 3 组平板'}
+  ],
+  muscle:[
+    {t:'推日：胸 · 肩 · 三头', d:'卧推、上斜推、哑铃推举、绳索下压'},
+    {t:'拉日：背 · 二头', d:'高位下拉、坐姿划船、面拉、弯举'},
+    {t:'蹲日：腿 · 臀', d:'深蹲、腿举、罗马尼亚硬拉、提踵'},
+    {t:'弱项补强 + 核心', d:'肩背小肌群、核心抗旋转，别练到力竭'}
+  ],
+  posture:[
+    {t:'胸椎灵活 + 肩背激活', d:'猫牛式、靠墙滑臂、弹力带外旋，各 2 组'},
+    {t:'臀腿力量 + 核心稳定', d:'臀桥、死虫、侧平板，重点在"发力感"'},
+    {t:'步态与呼吸', d:'踝背屈、膈式呼吸 5 分钟，纠正含胸'},
+    {t:'久坐放松', d:'髂腰肌、胸小肌、颈后肌群各拉伸 60 秒'}
+  ]
+};
+
+function buildTable(){
+  let html = '<tr><th></th>' + DAYS.map(d=>`<th>${d}</th>`).join('') + '</tr>';
+  SLOTS.forEach((s,si)=>{
+    html += `<tr><th class="rowh">${s}</th>`;
+    for(let di=0; di<7; di++){
+      const b = busy[di][si];
+      html += `<td><button class="cell ${b?'busy':'free'}" data-d="${di}" data-s="${si}">${b?'有课':'有空'}</button></td>`;
+    }
+    html += '</tr>';
+  });
+  $('#slotTable').innerHTML = html;
+  $('#slotTable').querySelectorAll('.cell').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const d = +btn.dataset.d, s = +btn.dataset.s;
+      busy[d][s] = !busy[d][s];
+      btn.classList.toggle('busy', busy[d][s]);
+      btn.classList.toggle('free', !busy[d][s]);
+      btn.textContent = busy[d][s] ? '有课' : '有空';
+      updateSlotCount();
+      generate(true);
+    });
+  });
+  updateSlotCount();
+}
+function updateSlotCount(){
+  const free = busy.flat().filter(v=>!v).length;
+  $('#slotCount').textContent = `共 ${free} 个空闲时段`;
+}
+
+function pickSlots(n){
+  const prefIdx = state.pref.length ? state.pref.map(p=>SLOTS.indexOf(p)) : [2,1,0];
+  const order = [...new Set([...prefIdx, 2,1,0])];
+  const cands = [];
+  order.forEach(s=>{ for(let d=0; d<7; d++){ if(!busy[d][s]) cands.push({d,s}); } });
+  const chosen = [], used = new Set();
+  for(const c of cands){ if(chosen.length>=n) break; if(used.has(c.d)) continue; chosen.push(c); used.add(c.d); }
+  for(const c of cands){ if(chosen.length>=n) break; if(chosen.some(x=>x.d===c.d&&x.s===c.s)) continue; chosen.push(c); }
+  chosen.sort((a,b)=> a.d-b.d || b.s-a.s);
+  return chosen;
+}
+
+function generate(silent){
+  const slots = pickSlots(FREQ);
+  const tpl = TEMPLATES[GOAL];
+  $('#outMeta').textContent = `目标：${GOAL_NAME[GOAL]} · ${FREQ} 次`;
+
+  if(!slots.length){
+    $('#plist').innerHTML = '<div class="empty-state">这周一个空闲时段都没有，先点亮几个格子</div>';
+    $('#outNote').textContent = '把有课的格子切回「有空」，就能排了。';
+    $('#mS').textContent = 0; $('#mM').textContent = 0; $('#mB').textContent = 0;
+    return;
+  }
+
+  const college = state.college || '本校';
+  $('#plist').innerHTML = slots.map((c,i)=>{
+    const t = tpl[i % tpl.length];
+    const buddy = 2 + (i % 3);
+    const same = state.saved
+      ? (i % 2 === 0 ? `${state.campus} ${buddy - 1} 人` : `${college} ${buddy - 1} 人`)
+      : `同校区 ${buddy - 1} 人`;
+    return `<div class="pitem" style="animation-delay:${i*50}ms">
+      <div class="when"><b>${DAYS[c.d]}</b><span>${SLOT_TIME[c.s]}</span></div>
+      <div class="what"><b>${t.t}</b><span>${t.d}<br>${state.place} · 搭子 ${buddy} 人（${same}）</span></div>
+    </div>`;
+  }).join('');
+
+  const buddies = slots.reduce((a,_,i)=>a + (2 + (i%3)), 0);
+  $('#mS').textContent = slots.length;
+  $('#mM').textContent = slots.length * 60;
+  $('#mB').textContent = buddies;
+
+  const need = FREQ - slots.length;
+  $('#outNote').innerHTML = (need > 0
+    ? `已排 <b>${slots.length}</b> 次（课表只剩这么多空闲），还有 ${need} 次下周补。<br>`
+    : `全部落在你标记的空闲时段，且尽量避开连续两天。<br>`)
+    + `匹配条件：同校区优先 · 本校实名 · 信用分 ≥ 95 · 水平接近。<br>首次见面建议：${state.place} 公共区域，白天时段。`;
+  if(!silent && !state.saved) toast('想知道怎么排的？先在上一步填一下资料');
+}
+
+$('#genBtn').addEventListener('click', ()=>{ generate(); toast('已按你的空闲时段重排'); });
+$('#clearAll').addEventListener('click', ()=>{
+  busy = busy.map(r=>r.map(()=>true));
+  buildTable(); generate(true);
+  toast('已清空，重新点亮你有空的时段');
+});
+
+/* ============ ③ 信用分 ============ */
+let score = 100, logs = [];
+function stateOf(s){
+  if(s >= 90) return {txt:'状态正常', bg:'rgba(124,196,155,.18)', fg:'#9BD8B4', bar:'linear-gradient(90deg,#3E8A65,#7CC49B)'};
+  if(s >= 75) return {txt:'状态良好', bg:'rgba(124,196,155,.14)', fg:'#9BD8B4', bar:'linear-gradient(90deg,#3E8A65,#7CC49B)'};
+  if(s >= 60) return {txt:'进入观察期', bg:'rgba(255,138,92,.18)', fg:'#FFB59E', bar:'linear-gradient(90deg,#C9762F,#FF8A5C)'};
+  return {txt:'取消匹配资格', bg:'rgba(255,90,54,.22)', fg:'#FF9C86', bar:'linear-gradient(90deg,#8E2A16,#FF5A36)'};
+}
+function renderScore(jolt){
+  const st = stateOf(score);
+  $('#score').textContent = score;
+  $('#badge').textContent = st.txt;
+  $('#badge').style.background = st.bg;
+  $('#badge').style.color = st.fg;
+  $('#fill').style.width = Math.max(score,0) + '%';
+  $('#fill').style.background = st.bar;
+  if(jolt){ const s = $('#score'); s.classList.remove('jolt'); void s.offsetWidth; s.classList.add('jolt'); }
+  $('#logCount').textContent = logs.length + ' 条';
+  $('#log').innerHTML = logs.length ? logs.map(l=>`<li><div>${l.r}<span>${l.t}</span></div><b style="color:${l.d>0?'var(--green)':'var(--coral)'}">${l.d>0?'+':''}${l.d}</b></li>`).join('')
+    : '<li style="border:none;color:var(--muted)">还没有记录。每一次履约都会被记住。</li>';
+}
+document.querySelectorAll('.sim').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const d = +b.dataset.d;
+    const before = score;
+    score = Math.max(0, Math.min(100, score + d));
+    const now = new Date();
+    const t = `今天 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    logs.unshift({r:b.dataset.r, d, t});
+    renderScore(true);
+    if(before >= 60 && score < 60) toast('低于 60 分：永久取消匹配资格');
+    document.querySelector('.steps a[data-step="3"]').classList.add('done');
+  });
+});
+$('#resetScore').addEventListener('click', ()=>{ score = 100; logs = []; renderScore(true); });
+
+/* ============ 重置全部 ============ */
+$('#resetAll').addEventListener('click', ()=>{
+  score = 100; logs = []; renderScore(true);
+  state.sid=''; state.college=''; state.agree=false;
+  $('#sid').value=''; $('#college').value=''; $('#agree').checked=false;
+  $('#ht').value=''; $('#wt').value=''; $('#bmiTxt').textContent='选填，只用于估算训练量，不外泄';
+  $('#sidState').className='idstate'; $('#sidState').innerHTML='<span class="dot"></span>未校验';
+  $('#formMsg').textContent='';
+  busy = [[0,1,0,0],[0,1,1,0],[0,0,1,0],[0,1,0,0],[0,0,0,1],[0,0,0,0],[0,0,0,0]];
+  buildTable(); generate(true); renderProfile();
+  document.querySelectorAll('.steps a').forEach(a=>a.classList.remove('done'));
+  window.scrollTo({top:0, behavior:'smooth'});
+  toast('已重置');
+});
+
+/* ============ 导航高亮 ============ */
+const secs = [...document.querySelectorAll('section[id]')];
+const links = [...document.querySelectorAll('.steps a')];
+window.addEventListener('scroll', ()=>{
+  const y = window.scrollY + 140;
+  let cur = secs[0]?.id;
+  secs.forEach(s=>{ if(s.offsetTop <= y) cur = s.id; });
+  links.forEach(a=>a.classList.toggle('on', a.getAttribute('href') === '#'+cur));
+});
+
+/* init */
+buildTable();
+generate(true);
+renderScore();
+renderProfile();
+</script>
+</body>
+</html>
